@@ -5,9 +5,9 @@ async function main(){
     for(var row = 0;row < lines.length;row++){
         for(var column = 0;column < lines[row].length;column++){
             var numAndIndexs = await numberAndIndex(row,column);
-            // console.log(await numAndIndexs[1]);
-            if(!isNaN(numAndIndexs[0])){
-            await indexsNearSpecialCharacter(numAndIndexs[1], row);
+            
+            if(!isNaN(numAndIndexs[0]) && numAndIndexs[0] != 0){
+                await indexsNearSpecialCharacter(numAndIndexs[1], row);
             }
         }
     }
@@ -35,7 +35,7 @@ if(isFirst){
         indexs.push(l);
         theNumber = theNumber + lines[row][l];
         l = l+1
-        if(isNaN(lines[row][l])){
+        if(isNaN(lines[row][l]) || l == 10){
             notLast = false;
         }
     }
@@ -47,28 +47,17 @@ return returner;
 // given an array of indexs and a row number, return boolean for is near a special character
 async function indexsNearSpecialCharacter(indexs, row){
     var lines = (await readCalibrationInput()).split('\n');
+    let notSpecial = [".","0","1","2","3","4","5","6","7","8","9"]
+    let first, last, top, bottom;
     out = false;
-    first = false;
-    last = false;
-    top = false;
-    bottom = false;
-    if(indexs[0] == 0){
-        first = true;
-    }
-    if(indexs[indexs.length - 1] == lines[row].length-1){
-        last = true;
-    }
-    if(row == 0){
-        top = true;
-    }
-    if(row == lines.length){
-        bottom = true;
-    }
-    console.log(indexs);
-    if(!top){
-        console.log("This thing is true")
-        if(lines[row -1][indexs[0] -1] != "." || lines[row][indexs[0] -1] != "." || lines[row +1][indexs[0] -1] != "."){
-            console.log("hello");
+    // console.log(lines[row].length);
+    first = await indexs[0] === 0;
+    last = await indexs[indexs.length - 1] === lines[row].length - 1;
+    top = await row === 0;
+    bottom = await row === lines.length - 1;
+    if(!top && !first && !bottom){
+        if(!notSpecial.includes(lines[row -1][indexs[0] -1]) || !notSpecial.includes(lines[row][indexs[0] -1])|| !notSpecial.includes(lines[row +1][indexs[0] -1])){
+            console.log(indexs, row);
         }
     }
   }
