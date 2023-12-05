@@ -1,16 +1,19 @@
-
-
 async function main(){
+    var out = 0;
     var lines = (await readCalibrationInput()).split('\n');
     for(var row = 0;row < lines.length;row++){
         for(var column = 0;column < lines[row].length;column++){
             var numAndIndexs = await numberAndIndex(row,column);
             
             if(!isNaN(numAndIndexs[0]) && numAndIndexs[0] != 0){
-                await indexsNearSpecialCharacter(numAndIndexs[1], row);
+                let nearSpecial = await indexsNearSpecialCharacter(numAndIndexs[1], row);
+                if(nearSpecial){
+                    out = out + Number(numAndIndexs[0]);
+                }
             }
         }
     }
+    console.log(out);
 }
 
 // given a row and column index', returns the number if given first index of number, also returns an array of all index in the number.
@@ -47,19 +50,25 @@ return returner;
 // given an array of indexs and a row number, return boolean for is near a special character
 async function indexsNearSpecialCharacter(indexs, row){
     var lines = (await readCalibrationInput()).split('\n');
-    let notSpecial = [".","0","1","2","3","4","5","6","7","8","9"]
-    let first, last, top, bottom;
-    out = false;
-    // console.log(lines[row].length);
-    first = await indexs[0] === 0;
-    last = await indexs[indexs.length - 1] === lines[row].length - 1;
-    top = await row === 0;
-    bottom = await row === lines.length - 1;
-    if(!top && !first && !bottom){
-        if(!notSpecial.includes(lines[row -1][indexs[0] -1]) || !notSpecial.includes(lines[row][indexs[0] -1])|| !notSpecial.includes(lines[row +1][indexs[0] -1])){
-            console.log(indexs, row);
+    let notSpecial = [".","0","1","2","3","4","5","6","7","8","9"];
+    let rowLength = lines[0].length -1;
+    let columnLength = lines.length;
+    let indexsToCheck = [[row,indexs[0]-1],[row,indexs[indexs.length-1]+1],[row-1,indexs[0]-1],[row-1,indexs[indexs.length-1]+1],[row+1,indexs[0]-1],[row+1,indexs[indexs.length-1]+1]];
+    for(var i = 0;i < indexs.length;i++){
+        indexsToCheck.push([row-1,indexs[i]],[row+1,indexs[i]]);
+    }
+    for(var i = 0;i < indexsToCheck.length;i++){
+        if(indexsToCheck[i].includes(-1) || indexsToCheck[i][0] == columnLength || indexsToCheck[i][1] == rowLength){
+            continue;
+        }
+        else{
+            if(!notSpecial.includes(lines[indexsToCheck[i][0]][indexsToCheck[i][1]])){
+                return true;
+            }
         }
     }
+    return false;
+
   }
 
 async function readCalibrationInput(){
