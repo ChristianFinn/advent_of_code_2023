@@ -1,17 +1,48 @@
 async function main(){
     var out = 0;
     var lines = (await readCalibrationInput()).split('\n');
+    var specialIndexs = [];
+    var specialNumbers = [];
     for(var row = 0;row < lines.length;row++){
         for(var column = 0;column < lines[row].length;column++){
             var numAndIndexs = await numberAndIndex(row,column);
-            
             if(!isNaN(numAndIndexs[0]) && numAndIndexs[0] != 0){
                 let nearSpecial = await indexsNearSpecialCharacter(numAndIndexs[1], row);
-                if(nearSpecial){
+                if(nearSpecial[0] && !nearSpecial[1]){
                     out = out + Number(numAndIndexs[0]);
+                }
+                if(nearSpecial[0] && nearSpecial[1]){
+                    specialNumbers.push(numAndIndexs[0]);
+                    specialIndexs.push(nearSpecial[2]);
                 }
             }
         }
+    }
+    var finalNumbers = [];
+    for(var i = 0;i < specialNumbers.length;i++){
+        var numberBeingChecked = specialNumbers[i];
+        var indexBeingChecked = specialIndexs[i];
+        var isFinal = true;
+        specialIndexs.splice(i, 1);
+        specialNumbers.splice(i, 1);
+        // console.log(numberBeingChecked);
+        for(var j = 0;j < specialNumbers.length;j++){
+            if(indexBeingChecked[0] == specialIndexs[j][0] && indexBeingChecked[1] == specialIndexs[j][1]){
+                console.log(numberBeingChecked);
+                console.log(specialNumbers[j]);
+                out = out + (Number(numberBeingChecked)*Number(specialNumbers[j]));
+                specialIndexs.splice(j, 1);
+                specialNumbers.splice(j, 1);
+                isFinal = false
+            }
+        }
+        if(isFinal){
+            finalNumbers.push(numberBeingChecked);
+        }
+    }
+    console.log(finalNumbers);
+    for(var i = 0;i < finalNumbers.length;i++){
+        out = out + Number(finalNumbers[i]);
     }
     console.log(out);
 }
@@ -38,7 +69,7 @@ if(isFirst){
         indexs.push(l);
         theNumber = theNumber + lines[row][l];
         l = l+1
-        if(isNaN(lines[row][l]) || l == 10){
+        if(isNaN(lines[row][l]) || l == lines[row].length -1){
             notLast = false;
         }
     }
@@ -63,11 +94,19 @@ async function indexsNearSpecialCharacter(indexs, row){
         }
         else{
             if(!notSpecial.includes(lines[indexsToCheck[i][0]][indexsToCheck[i][1]])){
-                return true;
+                if(lines[indexsToCheck[i][0]][indexsToCheck[i][1]] == "*"){
+                    star = true;
+                    starIndex = [indexsToCheck[i][0],indexsToCheck[i][1]];
+                }
+                else{
+                    star = false;
+                    starIndex = [];
+                }
+                return [true, star, starIndex];
             }
         }
     }
-    return false;
+    return [false, false, []];
 
   }
 
